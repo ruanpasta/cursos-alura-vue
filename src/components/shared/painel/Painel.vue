@@ -59,6 +59,10 @@ export default {
 .painel-fade-leave-active {
   transition: opacity 0.5s;
 }
+
+.painel-conteudo {
+  overflow: hidden;
+}
 </style>
 
 // painel-fade-ender - antes do elemento ser incluido ou removido

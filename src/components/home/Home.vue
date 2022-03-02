@@ -1,7 +1,10 @@
 
 <template>
   <div>
+    <!-- <img src="/static/download.jfif" /> -->
     <h1 class="centralizado" v-text="titulo" />
+
+    <p v-show="mensagem" class="centralizado">{{ mensagem }}</p>
 
     <input
       type="search"
@@ -18,7 +21,17 @@
         :key="index"
       >
         <meu-painel :titulo="foto.titulo">
-          <imagem-responsiva :titulo="foto.titulo" :url="foto.url" />
+          <imagem-responsiva
+            :titulo="foto.titulo"
+            :url="foto.url"
+            v-meu-transform:rotate.animate="15"
+          />
+          <router-link
+            :to="{ name: 'altera-cadastro', params: { id: foto._id } }"
+          >
+            <meu-botao tipo="button" rotulo="Alterar" />
+          </router-link>
+
           <meu-botao
             tipo="button"
             rotulo="Remover"
@@ -36,6 +49,7 @@
 import BotaoVue from "../shared/botao/Botao.vue";
 import ImagemResponsivaVue from "../shared/imagem-responsiva/ImagemResponsiva.vue";
 import PainelVue from "../shared/painel/Painel.vue";
+import FotoService from "../../domain/foto/FotoService";
 
 export default {
   components: {
@@ -47,6 +61,7 @@ export default {
     titulo: "Naruto",
     fotos: [],
     filtro: "",
+    mensagem: "",
   }),
   computed: {
     fotosComFiltro() {
@@ -59,14 +74,24 @@ export default {
   },
   methods: {
     remove(foto) {
-      alert("Remover imagem" + foto.titulo);
+      this.service.apaga(foto._id).then(
+        () => {
+          const index = this.fotos.indexOf(foto);
+          this.fotos.splice(index, 1);
+
+          this.mensagem = "Foto removida com sucesso!";
+        },
+        (err) => (this.mensagem = err.message)
+      );
     },
   },
   created() {
-    this.$http
-      .get("http://localhost:3000/v1/fotos")
-      .then((res) => res.json())
-      .then((fotos) => (this.fotos = fotos));
+    this.service = new FotoService(this.$resource);
+
+    this.service.lista().then(
+      (fotos) => (this.fotos = fotos),
+      (err) => (this.mensagem = err.message)
+    );
   },
 };
 </script>
